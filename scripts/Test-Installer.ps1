@@ -1,10 +1,13 @@
 param([Parameter(Mandatory)][string]$OldMsi,[Parameter(Mandatory)][string]$NewMsi,[Parameter(Mandatory)][string]$Version)
 $ErrorActionPreference='Stop'
+$OldMsi=(Resolve-Path $OldMsi).Path
+$NewMsi=(Resolve-Path $NewMsi).Path
 $root=Split-Path $PSScriptRoot -Parent
 $log=Join-Path $root 'artifacts/installer-tests'
 New-Item -ItemType Directory -Force $log | Out-Null
 function Invoke-Msi([string]$verb,[string]$file,[string]$name){
- $p=Start-Process msiexec.exe -ArgumentList "$verb `"$file`" /qn /norestart /L*v `"$log/$name.log`"" -Wait -PassThru
+ $logFile=Join-Path $log "$name.log"
+ $p=Start-Process msiexec.exe -ArgumentList "$verb `"$file`" /qn /norestart /L*v `"$logFile`"" -Wait -PassThru
  if($p.ExitCode -notin @(0,3010)){throw "MSI $name failed: $($p.ExitCode)"}
 }
 function Query-Msi([string]$path,[string]$query){
@@ -36,7 +39,8 @@ $env:SMC_SMOKE_DIR=Join-Path $root 'artifacts/installed-smoke'
 $run=Start-Process $exe -ArgumentList '--smoke-test' -PassThru
 if(-not $run.WaitForExit(60000)){$run.Kill();throw 'Installed app smoke test timed out'}
 if($run.ExitCode -ne 0){throw "Installed app smoke test failed: $($run.ExitCode)"}
-$downgrade=Start-Process msiexec.exe -ArgumentList "/i `"$OldMsi`" /qn /norestart /L*v `"$log/downgrade.log`"" -Wait -PassThru
+$downgradeLog=Join-Path $log 'downgrade.log'
+$downgrade=Start-Process msiexec.exe -ArgumentList "/i `"$OldMsi`" /qn /norestart /L*v `"$downgradeLog`"" -Wait -PassThru
 if($downgrade.ExitCode -eq 0){throw 'Downgrade was not blocked'}
 Invoke-Msi '/x' $NewMsi 'uninstall'
 if((Get-FileHash $sentinel).Hash -ne $hash){throw 'Uninstall removed user data'}
