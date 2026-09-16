@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting><AssemblyName>SMCWirelessStudio</AssemblyName><ApplicationIcon>Assets\studio.ico</ApplicationIcon><ApplicationManifest>app.manifest</ApplicationManifest></PropertyGroup>
+ <ItemGroup><ProjectReference Include="..\Studio.Core\Studio.Core.csproj"/><Resource Include="Assets\*.png"/><Resource Include="Assets\studio.ico"/></ItemGroup>
+</Project>

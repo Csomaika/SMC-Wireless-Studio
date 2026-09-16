@@ -1,0 +1,61 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+ <Package Name="SMC Wireless Studio" Manufacturer="Csomaika" Version="$(Version)" UpgradeCode="5938E091-958C-4CA9-BB70-72DB8E086A52" Scope="perMachine" Language="1033" Codepage="65001" InstallerVersion="500">
+  <SummaryInformation Description="SMC Wireless Studio Windows installer"/>
+  <MajorUpgrade DowngradeErrorMessage="A newer SMC Wireless Studio is already installed." Schedule="afterInstallInitialize"/>
+  <MediaTemplate EmbedCab="yes" CompressionLevel="high"/>
+  <Property Id="ARPPRODUCTICON" Value="StudioIcon"/>
+  <Property Id="ARPURLINFOABOUT" Value="https://github.com/Csomaika/SMC-Wireless-Studio"/>
+  <Property Id="ARPNOMODIFY" Value="1"/>
+  <Icon Id="StudioIcon" SourceFile="$(Assets)\studio.ico"/>
+  <StandardDirectory Id="ProgramFiles64Folder"><Directory Id="INSTALLFOLDER" Name="SMC Wireless Studio"/></StandardDirectory>
+  <StandardDirectory Id="ProgramMenuFolder"><Directory Id="MenuFolder" Name="SMC Wireless Studio"/></StandardDirectory>
+  <StandardDirectory Id="DesktopFolder"/>
+  <Feature Id="MainFeature" Title="SMC Wireless Studio" Level="1">
+   <Files Directory="INSTALLFOLDER" Include="$(PublishDir)\**"/>
+   <Component Id="Shortcuts" Directory="INSTALLFOLDER" Guid="2BFA6C4B-E09B-466A-90FC-C19BCA2F58E3">
+    <RegistryValue Root="HKLM" Key="Software\Csomaika\SMCWirelessStudio" Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" KeyPath="yes"/>
+    <Shortcut Id="StartShortcut" Directory="MenuFolder" Name="SMC Wireless Studio" Target="[INSTALLFOLDER]SMCWirelessStudio.exe" WorkingDirectory="INSTALLFOLDER" Icon="StudioIcon"/>
+    <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="SMC Wireless Studio" Target="[INSTALLFOLDER]SMCWirelessStudio.exe" WorkingDirectory="INSTALLFOLDER" Icon="StudioIcon"/>
+    <RemoveFolder Id="RemoveMenuFolder" Directory="MenuFolder" On="uninstall"/>
+   </Component>
+  </Feature>
+  <UI>
+   <TextStyle Id="NormalFont" FaceName="Segoe UI" Size="10"/>
+   <TextStyle Id="TitleFont" FaceName="Segoe UI" Size="18" Bold="yes" Blue="180"/>
+   <Property Id="DefaultUIFont" Value="NormalFont"/>
+   <Dialog Id="StudioWelcome" Width="410" Height="265" Title="SMC Wireless Studio Setup">
+    <Control Id="Title" Type="Text" X="22" Y="22" Width="366" Height="34" Text="{\TitleFont}SMC Wireless Studio"/>
+    <Control Id="Version" Type="Text" X="22" Y="65" Width="366" Height="22" Text="Version [ProductVersion] | Windows x64"/>
+    <Control Id="Details" Type="Text" X="22" Y="95" Width="366" Height="52" Text="Install the desktop application or update an older version. Saved projects stay in your user profile and are preserved during updates."/>
+    <Control Id="UpdateHint" Type="Text" X="22" Y="155" Width="366" Height="24" Text="An older version was detected. Select Update to continue." Hidden="yes" ShowCondition="WIX_UPGRADE_DETECTED"/>
+    <Control Id="SameHint" Type="Text" X="22" Y="155" Width="366" Height="24" Text="This version is installed. Repair can restore application files." Hidden="yes" ShowCondition="Installed"/>
+    <Control Id="Line" Type="Line" X="0" Y="193" Width="410" Height="1"/>
+    <Control Id="Install" Type="PushButton" X="22" Y="213" Width="80" Height="28" Text="Install" Default="yes" DisableCondition="Installed OR WIX_UPGRADE_DETECTED" EnableCondition="NOT Installed AND NOT WIX_UPGRADE_DETECTED"><Publish Event="EndDialog" Value="Return"/></Control>
+    <Control Id="Update" Type="PushButton" X="112" Y="213" Width="80" Height="28" Text="Update" DisableCondition="NOT WIX_UPGRADE_DETECTED" EnableCondition="WIX_UPGRADE_DETECTED"><Publish Event="EndDialog" Value="Return"/></Control>
+    <Control Id="Repair" Type="PushButton" X="202" Y="213" Width="80" Height="28" Text="Repair" DisableCondition="NOT Installed" EnableCondition="Installed"><Publish Property="REINSTALL" Value="ALL" Order="1"/><Publish Property="REINSTALLMODE" Value="amus" Order="2"/><Publish Event="EndDialog" Value="Return" Order="3"/></Control>
+    <Control Id="Cancel" Type="PushButton" X="309" Y="213" Width="80" Height="28" Text="Cancel" Cancel="yes"><Publish Event="EndDialog" Value="Exit"/></Control>
+   </Dialog>
+   <Dialog Id="StudioProgress" Width="410" Height="210" Title="SMC Wireless Studio" Modeless="yes">
+    <Control Id="Title" Type="Text" X="22" Y="22" Width="366" Height="38" Text="{\TitleFont}Installing / updating"/>
+    <Control Id="Info" Type="Text" X="22" Y="80" Width="366" Height="35" Text="Please wait while Windows Installer updates the application. Your saved projects are preserved."/>
+    <Control Id="Progress" Type="ProgressBar" X="22" Y="137" Width="366" Height="18" ProgressBlocks="yes"><Subscribe Event="SetProgress" Attribute="Progress"/></Control>
+    <Control Id="Action" Type="Text" X="22" Y="171" Width="366" Height="25"><Subscribe Event="ActionText" Attribute="Text"/></Control>
+   </Dialog>
+   <Dialog Id="StudioFinished" Width="410" Height="220" Title="SMC Wireless Studio" NoMinimize="yes">
+    <Control Id="Title" Type="Text" X="22" Y="22" Width="366" Height="36" Text="{\TitleFont}Setup completed"/>
+    <Control Id="Info" Type="Text" X="22" Y="82" Width="366" Height="66" Text="SMC Wireless Studio is ready. Open it from the desktop or Start menu. Future releases can be installed with Update without manually uninstalling the previous version."/>
+    <Control Id="Finish" Type="PushButton" X="300" Y="173" Width="88" Height="28" Text="Finish" Default="yes" Cancel="yes"><Publish Event="EndDialog" Value="Return"/></Control>
+   </Dialog>
+   <Dialog Id="StudioFailed" Width="410" Height="200" Title="SMC Wireless Studio">
+    <Control Id="Info" Type="Text" X="22" Y="30" Width="366" Height="85" Text="Setup did not complete. Your saved project files were not removed. Close the running application and retry, or inspect the Windows Installer log."/>
+    <Control Id="Close" Type="PushButton" X="300" Y="150" Width="88" Height="28" Text="Close" Default="yes" Cancel="yes"><Publish Event="EndDialog" Value="Return"/></Control>
+   </Dialog>
+   <InstallUISequence>
+    <Show Dialog="StudioWelcome" Before="ExecuteAction" Condition="NOT REMOVE~=&quot;ALL&quot;"/>
+    <Show Dialog="StudioProgress" After="StudioWelcome" Condition="NOT REMOVE~=&quot;ALL&quot;"/>
+    <Show Dialog="StudioFinished" OnExit="success" Condition="NOT REMOVE~=&quot;ALL&quot;"/>
+    <Show Dialog="StudioFailed" OnExit="error"/>
+   </InstallUISequence>
+  </UI>
+ </Package>
+</Wix>
