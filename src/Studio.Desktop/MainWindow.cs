@@ -28,6 +28,7 @@ public sealed partial class MainWindow : Window
     public static Version CurrentVersion=>Assembly.GetExecutingAssembly().GetName().Version??new(0,1,0);
     public MainWindow(bool smoke=false)
     {
+        Style=(Style)FindResource(typeof(Window));
         smokeMode=smoke;Title="SMC Wireless Studio";Width=1500;Height=940;MinWidth=1150;MinHeight=740;WindowStartupLocation=WindowStartupLocation.CenterScreen;
         Icon=BitmapFrame.Create(new Uri("pack://application:,,,/Assets/studio.ico"));
         store=new ProjectStore(smoke?Path.Combine(Path.GetTempPath(),"SMCStudio-smoke-"+Guid.NewGuid()):null);
