@@ -36,7 +36,7 @@
     <Control Id="Cancel" Type="PushButton" X="309" Y="213" Width="80" Height="28" Text="Cancel" Cancel="yes"><Publish Event="EndDialog" Value="Exit"/></Control>
    </Dialog>
    <Dialog Id="StudioProgress" Width="410" Height="210" Title="SMC Wireless Studio" Modeless="yes">
-    <Control Id="Title" Type="Text" X="22" Y="22" Width="366" Height="38" Text="{\TitleFont}Installing / updating"/>
+    <Control Id="Title" Type="Text" X="22" Y="22" Width="366" Height="38" Text="{\TitleFont}Installing / updating" TabSkip="no"/>
     <Control Id="Info" Type="Text" X="22" Y="80" Width="366" Height="35" Text="Please wait while Windows Installer updates the application. Your saved projects are preserved."/>
     <Control Id="Progress" Type="ProgressBar" X="22" Y="137" Width="366" Height="18" ProgressBlocks="yes"><Subscribe Event="SetProgress" Attribute="Progress"/></Control>
     <Control Id="Action" Type="Text" X="22" Y="171" Width="366" Height="25"><Subscribe Event="ActionText" Attribute="Text"/></Control>
