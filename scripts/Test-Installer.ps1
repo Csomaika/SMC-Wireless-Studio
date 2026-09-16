@@ -10,14 +10,15 @@ function Invoke-Msi([string]$verb,[string]$file,[string]$name){
 function Query-Msi([string]$path,[string]$query){
  $installer=New-Object -ComObject WindowsInstaller.Installer
  $db=$installer.OpenDatabase((Resolve-Path $path).Path,0)
- $view=$db.OpenView($query);$view.Execute();$record=$view.Fetch()
+ $view=$db.OpenView($query);[void]$view.Execute();$record=$view.Fetch()
  if($null -eq $record){throw "MSI query found no row: $query"}
- return $record.StringData(1)
+ return [string]$record.StringData(1)
 }
 $label=Query-Msi $NewMsi 'SELECT `Text` FROM `Control` WHERE `Dialog_` = ''StudioWelcome'' AND `Control` = ''Update'''
 if($label -ne 'Update'){throw 'Installer Update button missing'}
 $oldUpgrade=Query-Msi $OldMsi 'SELECT `Value` FROM `Property` WHERE `Property` = ''UpgradeCode'''
 $newUpgrade=Query-Msi $NewMsi 'SELECT `Value` FROM `Property` WHERE `Property` = ''UpgradeCode'''
+Write-Host "Upgrade identities: old=[$oldUpgrade] new=[$newUpgrade]"
 if($oldUpgrade -ne $newUpgrade){throw 'Upgrade identity changed'}
 $data=Join-Path $env:LOCALAPPDATA 'SMC Wireless Studio/Projects'
 New-Item -ItemType Directory -Force $data | Out-Null
